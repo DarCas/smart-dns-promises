@@ -2,7 +2,7 @@
 
 ![NPM Last Update](https://img.shields.io/npm/last-update/%40darcas%2Fsmart-dns-promises)
 ![NPM Version](https://img.shields.io/npm/v/%40darcas%2Fsmart-dns-promises)
-![NPM Downloads](https://img.shields.io/npm/dw/%40darcas%2Fsmart-dns-promises)
+![NPM Downloads](https://img.shields.io/npm/dy/%40darcas%2Fsmart-dns-promises)
 ![NPM License](https://img.shields.io/npm/l/%40darcas%2Fsmart-dns-promises)
 
 A simple and efficient DNS resolver with caching and configurable DNS providers for Node.js 20 and 22 or above.
