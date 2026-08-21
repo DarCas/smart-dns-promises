@@ -8,7 +8,7 @@ Single-file npm library (`@darcas/smart-dns-promises`): DNS resolver with cachin
 
 ```bash
 npm test         # vitest run
-npm run build    # rm -rf dist && tshy && esbuild minify (CJS + ESM)
+npm run build    # rm -rf dist && tsc (esm) && tsc (cjs) && esbuild minify (CJS + ESM)
 npm run deploy   # build && npm publish --access public (normally NOT run locally)
 ```
 
@@ -16,7 +16,7 @@ There is no lint script.
 
 ## Build & publish flow
 
-- Build uses **tshy** to produce dual ESM/CJS output in `dist/`, then esbuild bundles `index.min.js` for the extra `./min` export. Both export maps in `package.json` must stay in sync with the `tshy.exports` block when adding entry points.
+- Build runs `tsc` twice: `build:esm` (NodeNext → `dist/esm`) and `build:cjs` (`--module commonjs --moduleResolution node10` → `dist/commonjs`, with a generated `dist/commonjs/package.json` containing `{"type":"commonjs"}` since the package root is `"type": "module"`). Then esbuild bundles `index.min.js` for the extra `./min` export in both formats. The static `exports` map in `package.json` is hand-maintained; keep it pointing at real files when changing entry points.
 - Publishing is automated: pushing a tag `v*` triggers `.github/workflows/publish.yml`, which runs `npm run deploy` on Node 24. To release: bump `version` in `package.json`, commit, tag, push tag. Never publish manually.
 
 ## Code conventions

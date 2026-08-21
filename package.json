@@ -9,7 +9,6 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "esbuild": "^0.24.2",
-    "tshy": "^3.0.2",
     "typescript": "^5.7.2",
     "vitest": "^4.1.11"
   },
@@ -29,12 +28,12 @@
     },
     "./min": {
       "import": {
-        "default": "./dist/esm/index.min.js",
-        "types": "./dist/esm/index.d.ts"
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.min.js"
       },
       "require": {
-        "default": "./dist/commonjs/index.min.js",
-        "types": "./dist/commonjs/index.d.ts"
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.min.js"
       }
     }
   },
@@ -63,28 +62,16 @@
     "url": "https://github.com/DarCas/smart-dns-promises"
   },
   "scripts": {
-    "build": "rm -rf ./dist && tshy && rm -rf ./dist/node_modules && npm run cjs && npm run esm",
+    "build": "rm -rf ./dist && npm run build:esm && npm run build:esm-pkg && npm run build:cjs && npm run cjs && npm run esm",
+    "build:esm": "tsc --outDir dist/esm",
+    "build:cjs": "tsc --outDir dist/commonjs --module commonjs --moduleResolution node10 && node -e \"const fs = require('fs'); fs.writeFileSync('dist/commonjs/package.json', JSON.stringify({ type: 'commonjs' }, null, 2) + '\\n')\"",
+    "build:esm-pkg": "node -e \"require('fs').writeFileSync('dist/esm/package.json', JSON.stringify({ type: 'module' }, null, 2) + '\\n')\"",
     "cjs": "esbuild --minify --sourcemap --bundle dist/commonjs/index.js --outfile=dist/commonjs/index.min.js --format=cjs --platform=node",
     "deploy": "npm run build && npm publish --access public",
     "esm": "esbuild --minify --sourcemap --bundle dist/esm/index.js --outfile=dist/esm/index.min.js --format=esm --platform=node",
     "test": "vitest run"
   },
-  "tshy": {
-    "exports": {
-      ".": "./src/index.ts",
-      "./min": {
-        "import": {
-          "default": "./dist/esm/index.min.js",
-          "types": "./dist/esm/index.d.ts"
-        },
-        "require": {
-          "default": "./dist/commonjs/index.min.js",
-          "types": "./dist/commonjs/index.d.ts"
-        }
-      }
-    }
-  },
   "type": "module",
   "types": "./dist/commonjs/index.d.ts",
-  "version": "1.1.0"
+  "version": "1.1.1"
 }
