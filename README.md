@@ -1,9 +1,10 @@
 # SmartDns
 
-![NPM Last Update](https://img.shields.io/npm/last-update/%40darcas%2Fsmart-dns-promises)
-![NPM Version](https://img.shields.io/npm/v/%40darcas%2Fsmart-dns-promises)
-![NPM Downloads](https://img.shields.io/npm/dy/%40darcas%2Fsmart-dns-promises)
-![NPM License](https://img.shields.io/npm/l/%40darcas%2Fsmart-dns-promises)
+![NPM Last Update](https://img.shields.io/npm/last-update/%40darcas%2Fsmart-dns-promises?style=for-the-badge)
+![NPM Version](https://img.shields.io/npm/v/%40darcas%2Fsmart-dns-promises?style=for-the-badge)
+![NPM Downloads](https://img.shields.io/npm/dy/%40darcas%2Fsmart-dns-promises?style=for-the-badge)
+
+![NPM License](https://img.shields.io/npm/l/%40darcas%2Fsmart-dns-promises?style=for-the-badge)
 
 A simple and efficient DNS resolver with caching and configurable DNS providers for Node.js 20 and 22 or above.
 
@@ -11,9 +12,14 @@ The purpose of this library is to increase the speed and performance of DNS reso
 
 ## Features
 
-- DNS resolution with caching for faster lookups.
+- DNS resolution with caching for faster lookups (zero runtime dependencies).
+- Cache entries expire according to the **real DNS record TTL** (configurable min/max clamp).
+- Negative caching of failed lookups to avoid hammering the resolver on down hosts.
+- In-flight deduplication: concurrent lookups for the same hostname trigger a single DNS query.
+- Optional stale-while-revalidate: expired entries are served immediately and refreshed in background.
+- Lookup statistics: hits, misses, errors, revalidations and average resolve time.
 - Supports configurable DNS providers: CloudFlare, Google, and OpenDNS.
-- Allows custom result order for DNS resolutions: IPv4 first, IPv6 first, or verbatim.
+- Allows custom result order for DNS resolutions: IPv4 first, IPv6 first, or verbatim, plus `ipv4`/`ipv6` family selection.
 - Singleton pattern to ensure only one instance of the resolver is used.
 - Manual configuration of DNS server addresses.
 
@@ -34,6 +40,7 @@ yarn add @darcas/smart-dns-promises
 ## Usage
 
 > In environments such as APIs, it is recommended to call `factory` as early as possible in the application lifecycle to benefit from Node.js's DNS system configuration.
+> See [Process-wide behaviour](#process-wide-behaviour) for details.
  
 ### Creating an instance
 
@@ -47,6 +54,37 @@ const dns = SmartDns.factory();
 
 // Optionally, configure DNS provider and result order
 const dnsWithConfig = SmartDns.factory('Google', 'ipv4first', 600000);
+
+// Advanced options (4th argument)
+const dnsAdvanced = SmartDns.factory('CloudFlare', 'ipv4first', undefined, {
+    swr: true,          // serve stale entries and refresh in background
+    negativeTtl: 30000, // how long failed lookups are negatively cached (ms)
+    minTtl: 1000,       // clamp for record TTLs coming from DNS (ms)
+    maxTtl: 3600000,    // clamp for record TTLs coming from DNS (ms)
+    family: 'ipv6',     // resolve AAAA records instead of A records
+    onStats: (stats) => console.log(stats),
+});
+```
+
+> Configuration passed to `factory` after the first call is ignored, because the singleton has already been created.
+
+### Process-wide behaviour
+
+`SmartDns` intentionally configures **Node's process-global DNS system** (`node:dns`):
+
+- `setProvider()` and `setServers()` replace the resolver servers for the **whole process**, not just for this library.
+- The `resultOrder` argument of `factory`/the constructor calls Node's `dns.setDefaultResultOrder()`, which is global too.
+
+This is by design: every HTTP client in the application — axios, fetch, or any other dependency performing DNS lookups — benefits from (and is affected by) the configured provider. For this reason, call `factory()` as **early as possible** in the application lifecycle, ideally once, so your entire Node.js software runs with a consistent and fast DNS configuration.
+
+If multiple configurations are applied, the last one wins for the whole process.
+
+### Statistics
+
+Every lookup updates the instance counters, available via the `stats` getter:
+
+```js
+const { hits, misses, errors, revalidations, avgResolveMs } = dns.stats
 ```
 ### Setting the DNS provider
 
@@ -117,6 +155,33 @@ axios.interceptors.request.use(async (config: InternalAxiosRequestConfig): Promi
     return config
 })
 ```
+
+## Example with fetch
+
+The same idea with the global `fetch`: resolve once, request the IP directly and pass the original hostname in the `Host` header.
+
+```ts
+import { SmartDns } from '@darcas/smart-dns-promises'
+
+const dns = SmartDns.factory()
+
+async function smartFetch(url: string, init: RequestInit = {}): Promise<Response> {
+    const { urlReplaced } = await dns.resolver(url)
+
+    return fetch(urlReplaced, {
+        ...init,
+        headers: {
+            ...init.headers,
+            Host: new URL(url).hostname,
+        },
+    })
+}
+```
+
+Two things to keep in mind:
+
+1. Replacing the hostname with the IP address means the TLS handshake is performed against the IP: this works out of the box with plain HTTP endpoints or controlled environments, but on public HTTPS endpoints the certificate is issued to the hostname, so the request will fail certificate validation. For HTTPS use cases prefer the axios example above.
+2. Thanks to the cache, subsequent requests to the same host skip the DNS lookup entirely.
 
 ## Contributing
 

@@ -6,15 +6,12 @@
   "bugs": {
     "url": "https://github.com/DarCas/smart-dns-promises/issues"
   },
-  "dependencies": {
-    "lru-cache": "^11.0.2"
-  },
-  "description": "A simple and efficient DNS resolver with caching and configurable DNS providers for Node.js 20 and 22 or above, designed to enhance DNS resolution performance in environments using libraries like fetch or axios.",
   "devDependencies": {
     "@types/node": "^22.10.2",
     "esbuild": "^0.24.2",
     "tshy": "^3.0.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": "20 || >= 22"
@@ -70,7 +67,7 @@
     "cjs": "esbuild --minify --sourcemap --bundle dist/commonjs/index.js --outfile=dist/commonjs/index.min.js --format=cjs --platform=node",
     "deploy": "npm run build && npm publish --access public",
     "esm": "esbuild --minify --sourcemap --bundle dist/esm/index.js --outfile=dist/esm/index.min.js --format=esm --platform=node",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run"
   },
   "tshy": {
     "exports": {
@@ -89,5 +86,5 @@
   },
   "type": "module",
   "types": "./dist/commonjs/index.d.ts",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
