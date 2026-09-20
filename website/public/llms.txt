@@ -1,0 +1,62 @@
+# SmartDns
+
+> SmartDns is a zero-dependency DNS resolver for Node.js with intelligent caching,
+> TTL-aware expiration, request deduplication, optional stale-while-revalidate and
+> configurable DNS providers. Written in TypeScript, shipped as ESM and CJS, MIT licensed.
+
+## Links
+
+- [Website](https://smartdns.os.darcas.app/)
+- [GitHub repository](https://github.com/DarCas/smart-dns-promises)
+- [npm package](https://www.npmjs.com/package/@darcas/smart-dns-promises)
+- [README and documentation](https://github.com/DarCas/smart-dns-promises#readme)
+- [Full reference for language models](https://smartdns.os.darcas.app/llms-full.txt)
+- [Author: Dario Casertano](https://casertano.name/)
+
+## Core facts
+
+- Package: [@darcas/smart-dns-promises](https://www.npmjs.com/package/@darcas/smart-dns-promises)
+- Repository: [github.com/DarCas/smart-dns-promises](https://github.com/DarCas/smart-dns-promises)
+- Runtime: Node.js 20 or >= 22
+- Runtime dependencies: none
+- License: MIT
+
+## What it does
+
+- Resolves a URL's hostname to an IP address before the HTTP request is made.
+- Caches resolved records, honoring the real DNS record TTL clamped to configurable bounds.
+- Deduplicates concurrent lookups for the same hostname into a single in-flight resolution.
+- Optionally serves stale entries while refreshing them in the background (SWR).
+- Remembers failed lookups in a short negative cache to avoid repeated resolver pressure.
+- Configures Node.js process-global DNS: providers, custom servers and result ordering.
+- Exposes statistics: hits, misses, errors, revalidations and average resolve time.
+
+## Providers
+
+- AdGuard: 94.140.14.14, 94.140.15.15
+- Cloudflare: 1.1.1.1, 1.0.0.1
+- Comodo: 8.26.56.26, 8.20.247.20
+- DNS.WATCH: 84.200.69.80, 84.200.70.40
+- Google: 8.8.8.8, 8.8.4.4
+- OpenDNS: 208.67.222.222, 208.67.220.220
+- Quad9: 9.9.9.9, 149.112.112.112
+- Verisign: 64.6.64.6, 64.6.65.6
+- Yandex: 77.88.8.8, 77.88.8.1
+- Custom servers via setServers().
+
+## Public API
+
+- SmartDns.factory(provider?, resultOrder?, ttl?, options?)
+- dns.resolver(url) -> { address, hostname, urlReplaced }
+- dns.setProvider(provider)
+- dns.setServers(servers)
+- dns.stats -> { hits, misses, errors, revalidations, avgResolveMs }
+- SmartDnsProviderError, SmartDnsResolverError
+- DnsProvider enum: AdGuard, CloudFlare, Comodo, DnsWatch, Google, OpenDNS, Quad9, Verisign, Yandex
+- Options: family, minTtl, maxTtl, negativeTtl, swr, onStats
+
+## Notes
+
+- setProvider, setServers and setDefaultResultOrder mutate process-global DNS behavior
+  intentionally. Initialize SmartDns early and avoid conflicting configurations.
+- The library sits before the HTTP client; it does not replace it.

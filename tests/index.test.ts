@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { setServers } from 'node:dns/promises'
 import { DnsProvider, SmartDns, SmartDnsProviderError, SmartDnsResolverError } from '../src/index.js'
 
 const mocks = vi.hoisted(() => ({
     resolve4: vi.fn(),
     resolve6: vi.fn(),
+    setServers: vi.fn(),
 }))
 
 vi.mock('node:dns/promises', () => {
@@ -15,7 +17,7 @@ vi.mock('node:dns/promises', () => {
     return {
         Resolver: MockResolver,
         setDefaultResultOrder: vi.fn(),
-        setServers: vi.fn(),
+        setServers: mocks.setServers,
     }
 })
 
@@ -32,6 +34,8 @@ describe('SmartDns', () => {
         mocks.resolve4.mockResolvedValue(A_RECORDS)
         mocks.resolve6.mockReset()
         mocks.resolve6.mockResolvedValue(A_RECORDS)
+        mocks.setServers.mockClear()
+        vi.mocked(setServers).mockClear()
     })
 
     afterEach(() => {
@@ -201,5 +205,23 @@ describe('SmartDns', () => {
 
     it('throws SmartDnsProviderError for unsupported providers', () => {
         expect(() => new TestDns(99 as DnsProvider)).toThrow(SmartDnsProviderError)
+    })
+
+    it.each([
+        [DnsProvider.AdGuard, ['94.140.14.14', '94.140.15.15']],
+        [DnsProvider.CloudFlare, ['1.1.1.1', '1.0.0.1']],
+        [DnsProvider.Comodo, ['8.26.56.26', '8.20.247.20']],
+        [DnsProvider.DnsWatch, ['84.200.69.80', '84.200.70.40']],
+        [DnsProvider.Google, ['8.8.8.8', '8.8.4.4']],
+        [DnsProvider.OpenDNS, ['208.67.222.222', '208.67.220.220']],
+        [DnsProvider.Quad9, ['9.9.9.9', '149.112.112.112']],
+        [DnsProvider.Verisign, ['64.6.64.6', '64.6.65.6']],
+        [DnsProvider.Yandex, ['77.88.8.8', '77.88.8.1']],
+    ] as Array<[DnsProvider, string[]]>)('sets servers for provider %d', (provider, servers) => {
+        const dns = new TestDns()
+
+        dns.setProvider(provider)
+
+        expect(vi.mocked(setServers)).toHaveBeenLastCalledWith(servers)
     })
 })

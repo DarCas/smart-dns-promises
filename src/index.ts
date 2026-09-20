@@ -105,9 +105,15 @@ interface StatsCounters {
  * @enum {number}
  */
 export enum DnsProvider {
+    AdGuard,
     CloudFlare,
+    Comodo,
+    DnsWatch,
     Google,
     OpenDNS,
+    Quad9,
+    Verisign,
+    Yandex,
 }
 
 /**
@@ -280,10 +286,31 @@ export class SmartDns {
      */
     setProvider(dnsProvider: DnsProvider): void {
         switch (dnsProvider) {
+            case DnsProvider.AdGuard:
+                setServers([
+                    '94.140.14.14',
+                    '94.140.15.15',
+                ])
+                break
+
             case DnsProvider.CloudFlare:
                 setServers([
                     '1.1.1.1',
                     '1.0.0.1',
+                ])
+                break
+
+            case DnsProvider.Comodo:
+                setServers([
+                    '8.26.56.26',
+                    '8.20.247.20',
+                ])
+                break
+
+            case DnsProvider.DnsWatch:
+                setServers([
+                    '84.200.69.80',
+                    '84.200.70.40',
                 ])
                 break
 
@@ -298,6 +325,27 @@ export class SmartDns {
                 setServers([
                     '208.67.222.222',
                     '208.67.220.220',
+                ])
+                break
+
+            case DnsProvider.Quad9:
+                setServers([
+                    '9.9.9.9',
+                    '149.112.112.112',
+                ])
+                break
+
+            case DnsProvider.Verisign:
+                setServers([
+                    '64.6.64.6',
+                    '64.6.65.6',
+                ])
+                break
+
+            case DnsProvider.Yandex:
+                setServers([
+                    '77.88.8.8',
+                    '77.88.8.1',
                 ])
                 break
 

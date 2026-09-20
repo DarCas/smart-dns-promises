@@ -1,0 +1,164 @@
+# SmartDns — full reference for language models
+
+SmartDns is a single-purpose Node.js library: it resolves hostnames to IP addresses and
+caches the result so the same question is not asked twice. It is a zero-runtime-dependency
+TypeScript package published as @darcas/smart-dns-promises under the MIT license.
+
+Source: [GitHub repository](https://github.com/DarCas/smart-dns-promises)
+Package: [npm @darcas/smart-dns-promises](https://www.npmjs.com/package/@darcas/smart-dns-promises)
+Website: [smartdns.os.darcas.app](https://smartdns.os.darcas.app/)
+
+## Positioning
+
+"The route before the request." DNS resolution happens before a connection is opened, so it
+is invisible in application telemetry yet repeated on every call. SmartDns keeps resolved
+hostnames in a TTL-aware cache, collapses concurrent lookups for the same host, and only
+contacts the resolver when it has to.
+
+SmartDns does not replace the HTTP client. It resolves the hostname first, then the client
+sends the request to the resolved address, keeping the original hostname in the Host header.
+
+## Requirements
+
+- Node.js 20 or >= 22 (engines: "20 || >= 22")
+- No runtime dependencies
+- TypeScript types included; ships both ESM and CJS entry points
+
+## Installation
+
+    npm install @darcas/smart-dns-promises
+
+## Quick start
+
+    import { SmartDns, DnsProvider } from '@darcas/smart-dns-promises'
+
+    const dns = SmartDns.factory(DnsProvider.CloudFlare)
+
+    const { address, hostname, urlReplaced } =
+        await dns.resolver('https://www.google.com')
+
+    // address     -> '142.250.72.14'
+    // hostname    -> 'www.google.com'
+    // urlReplaced -> 'https://142.250.72.14/'
+
+## Public API
+
+### DnsProvider
+
+Numeric enum: AdGuard, CloudFlare, Comodo, DnsWatch, Google, OpenDNS, Quad9, Verisign, Yandex.
+
+### SmartDns.factory(dnsProvider?, resultOrder?, ttl?, options?)
+
+Returns the singleton resolver. Configuration passed after the first call is ignored, so
+initialize it early. ttl (milliseconds) is the fallback lifetime used only when a DNS record
+reports no TTL.
+
+resultOrder: 'ipv4first' | 'ipv6first' | 'verbatim'.
+
+### dns.resolver(url)
+
+    async resolver(url: string): Promise<{ address: IPAddress; hostname: Hostname; urlReplaced: string }>
+
+Accepts absolute http/https URLs. Throws SmartDnsResolverError for an invalid URL or a
+negative-cached hostname.
+
+### dns.setProvider(dnsProvider)
+
+Selects the upstream resolver:
+- AdGuard: 94.140.14.14, 94.140.15.15
+- CloudFlare: 1.1.1.1, 1.0.0.1
+- Comodo: 8.26.56.26, 8.20.247.20
+- DnsWatch: 84.200.69.80, 84.200.70.40
+- Google: 8.8.8.8, 8.8.4.4
+- OpenDNS: 208.67.222.222, 208.67.220.220
+- Quad9: 9.9.9.9, 149.112.112.112
+- Verisign: 64.6.64.6, 64.6.65.6
+- Yandex: 77.88.8.8, 77.88.8.1
+
+An unknown provider throws SmartDnsProviderError.
+
+### dns.setServers(servers)
+
+    dns.setServers(['9.9.9.9', '149.112.112.112'])
+
+### dns.stats
+
+    { hits, misses, errors, revalidations, avgResolveMs }
+
+avgResolveMs is the total resolve time divided by the number of real resolutions, and is 0
+when no resolution has happened yet.
+
+### Options
+
+    SmartDns.factory(DnsProvider.CloudFlare, 'ipv4first', 3_600_000, {
+        family: 'ipv4',
+        minTtl: 1_000,
+        maxTtl: 3_600_000,
+        negativeTtl: 30_000,
+        swr: true,
+        onStats: (stats) => console.log(stats)
+    })
+
+- family: 'ipv4' | 'ipv6' (default 'ipv4')
+- minTtl / maxTtl: clamp the effective lifetime of a cached record
+- negativeTtl: lifetime of the negative cache
+- swr: serve stale entries while revalidating in the background
+- onStats: called with the updated statistics
+
+## Resolution order
+
+1. A valid cached entry is returned immediately (hit).
+2. If SWR is enabled, an expired entry is served immediately and refreshed in the background.
+3. A recently failed hostname is rejected from the negative cache.
+4. Only here is a DNS query issued. The answer is cached respecting the record TTL.
+
+## Integrations
+
+### Axios
+
+    import axios from 'axios'
+    import { SmartDns, DnsProvider } from '@darcas/smart-dns-promises'
+
+    const dns = SmartDns.factory(DnsProvider.OpenDNS)
+
+    axios.interceptors.request.use(async (config) => {
+        const { hostname, urlReplaced } = await dns.resolver(config.url!)
+
+        config.headers.Host = hostname
+        config.url = urlReplaced
+        return config
+    })
+
+### Fetch
+
+    const { hostname, urlReplaced } = await dns.resolver('http://service.internal/health')
+
+    const response = await fetch(urlReplaced, {
+        headers: { Host: hostname }
+    })
+
+Replacing the host with an IP means TLS is negotiated against that IP, so the direct fetch
+approach is best suited to plain HTTP and controlled environments; prefer the interceptor for
+public HTTPS.
+
+## Process-wide behavior
+
+setProvider, setServers and Node's result ordering are process-global. Every HTTP client in
+the process, including third-party dependencies, inherits the same resolution strategy. This
+is intentional: configure DNS once and let the process use it. Initialize SmartDns early and
+avoid conflicting configurations.
+
+## Errors
+
+- SmartDnsProviderError: unknown or unsupported DNS provider.
+- SmartDnsResolverError: invalid URL, or a hostname held in the negative cache.
+
+## Performance language
+
+SmartDns avoids unnecessary DNS work and keeps repeated lookups out of the critical path. It
+does not claim absolute speedups; the actual benefit depends on the workload and how often the
+same hostnames are resolved.
+
+## License
+
+MIT. Copyright Dario Casertano.

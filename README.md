@@ -6,6 +6,8 @@
 
 ![NPM License](https://img.shields.io/npm/l/%40darcas%2Fsmart-dns-promises?style=for-the-badge)
 
+[![Buy me a coffee](https://img.shields.io/badge/buy_me_a_coffee-%E2%9D%A4%EF%B8%8F-FEEBE7?style=for-the-badge&labelColor=FF0000)](https://www.paypal.com/donate/?hosted_button_id=YZQDE3TEYDBWA)
+
 A simple and efficient DNS resolver with caching and configurable DNS providers for Node.js 20 and 22 or above.
 
 The purpose of this library is to increase the speed and performance of DNS resolution in Node.js. In environments where requests are made using libraries like [fetch](https://github.com/node-fetch/node-fetch) or [axios](https://github.com/axios/axios), this can be very useful.
@@ -18,7 +20,7 @@ The purpose of this library is to increase the speed and performance of DNS reso
 - In-flight deduplication: concurrent lookups for the same hostname trigger a single DNS query.
 - Optional stale-while-revalidate: expired entries are served immediately and refreshed in background.
 - Lookup statistics: hits, misses, errors, revalidations and average resolve time.
-- Supports configurable DNS providers: CloudFlare, Google, and OpenDNS.
+- Supports configurable DNS providers: AdGuard, CloudFlare, Comodo, DNS.WATCH, Google, OpenDNS, Quad9, Verisign, and Yandex.
 - Allows custom result order for DNS resolutions: IPv4 first, IPv6 first, or verbatim, plus `ipv4`/`ipv6` family selection.
 - Singleton pattern to ensure only one instance of the resolver is used.
 - Manual configuration of DNS server addresses.
@@ -57,12 +59,12 @@ const dnsWithConfig = SmartDns.factory('Google', 'ipv4first', 600000);
 
 // Advanced options (4th argument)
 const dnsAdvanced = SmartDns.factory('CloudFlare', 'ipv4first', undefined, {
-    swr: true,          // serve stale entries and refresh in background
-    negativeTtl: 30000, // how long failed lookups are negatively cached (ms)
-    minTtl: 1000,       // clamp for record TTLs coming from DNS (ms)
-    maxTtl: 3600000,    // clamp for record TTLs coming from DNS (ms)
     family: 'ipv6',     // resolve AAAA records instead of A records
+    maxTtl: 3600000,    // clamp for record TTLs coming from DNS (ms)
+    minTtl: 1000,       // clamp for record TTLs coming from DNS (ms)
+    negativeTtl: 30000, // how long failed lookups are negatively cached (ms)
     onStats: (stats) => console.log(stats),
+    swr: true,          // serve stale entries and refresh in background
 });
 ```
 
@@ -88,11 +90,25 @@ const { hits, misses, errors, revalidations, avgResolveMs } = dns.stats
 ```
 ### Setting the DNS provider
 
-You can set the DNS provider to CloudFlare, Google, or OpenDNS using the `setProvider` method.
+You can set the DNS provider using the `setProvider` method with any `DnsProvider` member.
 
 ```js
 dns.setProvider('CloudFlare');
 ```
+
+Available providers:
+
+| Provider | Servers |
+|---|---|
+| AdGuard | `94.140.14.14`, `94.140.15.15` |
+| CloudFlare | `1.1.1.1`, `1.0.0.1` |
+| Comodo | `8.26.56.26`, `8.20.247.20` |
+| DNS.WATCH | `84.200.69.80`, `84.200.70.40` |
+| Google | `8.8.8.8`, `8.8.4.4` |
+| OpenDNS | `208.67.222.222`, `208.67.220.220` |
+| Quad9 | `9.9.9.9`, `149.112.112.112` |
+| Verisign | `64.6.64.6`, `64.6.65.6` |
+| Yandex | `77.88.8.8`, `77.88.8.1` |
 
 ### Setting the result Order
 
@@ -118,7 +134,10 @@ console.log(result.urlReplaced); // URL with IP address instead of hostname
 You can manually set DNS server IP addresses using the `setServers` method.
 
 ```js
-dns.setServers(['8.8.8.8', '8.8.4.4']);
+dns.setServers([
+  '8.8.8.8', 
+  '8.8.4.4',
+]);
 ```
 
 ## Error Handling

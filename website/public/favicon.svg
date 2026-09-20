@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="SmartDns">
+    <rect width="32" height="32" rx="6" fill="#10141a"/>
+    <rect x="1.5" y="1.5" width="29" height="29" rx="5" fill="none" stroke="#33404f"/>
+    <path d="M8 21 16 11l8 10" fill="none" stroke="#9aa6b6" stroke-width="1.3" stroke-linejoin="round"/>
+    <path d="M8 21h16" fill="none" stroke="#2fd6c4" stroke-width="1.7" stroke-linecap="round"/>
+    <circle cx="8" cy="21" r="2" fill="#e6ebf2"/>
+    <circle cx="16" cy="11" r="2" fill="#10141a" stroke="#9aa6b6" stroke-width="1.3"/>
+    <circle cx="24" cy="21" r="2" fill="#2fd6c4"/>
+</svg>
