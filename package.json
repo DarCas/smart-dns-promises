@@ -1,7 +1,8 @@
 {
   "author": {
     "email": "dario@casertano.name",
-    "name": "Dario Casertano (DarCas)"
+    "name": "Dario Casertano (DarCas)",
+    "url": "https://dariocasertano.com"
   },
   "bugs": {
     "url": "https://github.com/DarCas/smart-dns-promises/issues"
@@ -40,18 +41,23 @@
   "files": [
     "dist"
   ],
-  "homepage": "https://github.com/DarCas/smart-dns-promises",
+  "homepage": "https://smartdns.os.darcas.app",
+  "description": "Zero-dependency DNS resolver for Node.js with TTL-aware caching, request deduplication and stale-while-revalidate — 9 configurable providers, built for fetch and axios.",
   "keywords": [
     "dns",
+    "dns-resolver",
     "dns-cache",
-    "dns-provider",
-    "node",
-    "node-20",
-    "node-22",
-    "resolver",
-    "smart-dns",
-    "performance",
-    "speed"
+    "dns-lookup",
+    "nodejs",
+    "typescript",
+    "axios",
+    "fetch",
+    "caching",
+    "ttl",
+    "stale-while-revalidate",
+    "zero-dependency",
+    "deduplication",
+    "performance"
   ],
   "license": "MIT",
   "main": "./dist/commonjs/index.js",
@@ -73,5 +79,5 @@
   },
   "type": "module",
   "types": "./dist/commonjs/index.d.ts",
-  "version": "1.1.1"
+  "version": "1.2.0"
 }

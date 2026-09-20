@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { usePrefersReducedMotion } from '../hooks/useReveal';
 import { useScrollSpy } from '../hooks/useScrollSpy';
-import { GITHUB_URL } from '../lib/links';
 import { BrandMark } from './BrandMark';
 
 const SECTIONS = [
@@ -23,7 +22,7 @@ export function Nav() {
 	useEffect(() => {
 		if (!open) return;
 		const previous = document.documentElement.style.overflow;
-		document.documentElement.style.overflow = 'hidden';
+		document.documentElement.style.overflow = 'clip';
 		const onKey = (event: KeyboardEvent) => {
 			if (event.key === 'Escape') setOpen(false);
 		};
@@ -63,14 +62,8 @@ export function Nav() {
 								</a>
 							</li>
 						))}
-					</ul>
-
-					<div className="nav__actions">
-						<a className="btn" href={GITHUB_URL} target="_blank" rel="noreferrer noopener">
-							GitHub <span className="btn__arrow">↗</span>
-						</a>
-					</div>
-				</nav>
+				</ul>
+			</nav>
 
 				<button
 					type="button"
@@ -80,7 +73,7 @@ export function Nav() {
 					aria-label={open ? 'Close menu' : 'Open menu'}
 					onClick={() => setOpen((value) => !value)}
 				>
-					<span className="nav-toggle__bars" />
+					<span className="nav-toggle__icon" aria-hidden="true" />
 				</button>
 			</div>
 

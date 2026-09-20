@@ -1,28 +1,34 @@
 {
-    "name": "@darcas/smart-dns-promises-website",
-    "version": "1.0.0",
-    "private": true,
-    "type": "module",
-    "description": "Landing page for @darcas/smart-dns-promises",
-    "scripts": {
-        "dev": "vite",
-        "build": "node scripts/highlight.mjs && tsc --noEmit && vite build && node scripts/prerender.mjs",
-        "preview": "vite preview"
-    },
-    "dependencies": {
-        "@fontsource/ibm-plex-mono": "^5.1.1",
-        "@fontsource/space-grotesk": "^5.1.1",
-        "react": "^19.0.0",
-        "react-dom": "^19.0.0"
-    },
-    "devDependencies": {
-        "@darcas/rollup-sub-resource-integrity": "^2.0.3",
-        "@types/node": "^22.10.2",
-        "@types/react": "^19.0.2",
-        "@types/react-dom": "^19.0.2",
-        "@vitejs/plugin-react": "^4.3.4",
-        "shiki": "^1.24.4",
-        "typescript": "^5.8.3",
-        "vite": "^7.0.4"
-    }
+  "author": {
+    "email": "dario@casertano.name",
+    "name": "Dario Casertano (DarCas)",
+    "url": "https://casertano.name"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.1.1",
+    "@fontsource/space-grotesk": "^5.1.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "description": "Landing page for @darcas/smart-dns-promises",
+  "devDependencies": {
+    "@darcas/rollup-sub-resource-integrity": "^2.0.3",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "shiki": "^1.24.4",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.4"
+  },
+  "license": "MIT",
+  "name": "@darcas/smart-dns-promises-website",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/highlight.mjs && tsc --noEmit && vite build && node scripts/prerender.mjs",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "type": "module",
+  "version": "1.0.0"
 }
