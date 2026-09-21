@@ -1430,14 +1430,15 @@ code {
 }
 
 .swr__chip--bg {
-    color: var(--text-dim);
+    color: var(--text);
     border-style: dashed;
     animation: swr-bg 2.4s ease-in-out infinite;
 }
 
 @keyframes swr-bg {
     50% {
-        opacity: 0.45;
+        border-color: var(--accent-deep);
+        background: var(--accent-wash);
     }
 }
 
